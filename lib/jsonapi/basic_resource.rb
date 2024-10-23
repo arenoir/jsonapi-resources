@@ -177,6 +177,10 @@ module JSONAPI
       {}
     end
 
+    def deprecations
+      @deprecations
+    end
+
     private
 
     def save
@@ -425,6 +429,18 @@ module JSONAPI
       send(relationship.foreign_key)
     end
 
+    def _deprecated_attribute_accessed(attr, details)
+      @deprecations ||= {}
+      @deprecations['attributes'] ||= {}
+      @deprecations['attributes'][attr] ||= details
+    end
+
+    def _deprecated_attribute_written(attr, details) 
+      @deprecations ||= {}
+      @deprecations['attributes'] ||= {}
+      @deprecations['attributes'][attr] ||= details
+    end
+
     class << self
       def inherited(subclass)
         super
@@ -436,6 +452,7 @@ module JSONAPI
         subclass.exclude_links(_exclude_links)
         subclass.paginator(@_paginator)
         subclass._attributes = (_attributes || {}).dup
+        subclass.deprecations = (deprecations || {}).dup
         subclass.polymorphic(false)
         subclass.key_type(@_resource_key_type)
 
@@ -511,7 +528,7 @@ module JSONAPI
         end
       end
 
-      attr_accessor :_attributes, :_relationships, :_type, :_model_hints, :_routed, :_warned_missing_route
+      attr_accessor :_attributes, :_relationships, :_type, :_model_hints, :_routed, :_warned_missing_route, :deprecations
       attr_writer :_allowed_filters, :_paginator, :_allowed_sort
 
       def create(context)
@@ -555,10 +572,16 @@ module JSONAPI
         @_attributes ||= {}
         @_attributes[attr] = options
         define_method attr do
+          if options[:deprecated]
+            _deprecated_attribute_accessed(attr, options[:deprecated])
+          end
           @model.public_send(options[:delegate] ? options[:delegate].to_sym : attr)
         end unless method_defined?(attr)
 
         define_method "#{attr}=" do |value|
+          if options[:deprecated]
+            _deprecated_attribute_written(attr, options[:deprecated])
+          end
           @model.public_send("#{options[:delegate] ? options[:delegate].to_sym : attr}=", value)
         end unless method_defined?("#{attr}=")
 

@@ -46,6 +46,7 @@ class SerializerTest < ActionDispatch::IntegrationTest
           },
           attributes: {
             title: 'New post',
+            headline: 'New post',
             body: 'A body!!!',
             subject: 'New post'
           },
@@ -102,6 +103,7 @@ class SerializerTest < ActionDispatch::IntegrationTest
           },
           attributes: {
             title: 'New post',
+            headline: "New post",
             body: 'A body!!!',
             subject: 'New post'
           },
@@ -285,6 +287,7 @@ class SerializerTest < ActionDispatch::IntegrationTest
           },
           attributes: {
             title: 'New post',
+            headline: 'New post',
             body: 'A body!!!',
             subject: 'New post'
           },
@@ -403,6 +406,7 @@ class SerializerTest < ActionDispatch::IntegrationTest
           },
           attributes: {
             title: 'New post',
+            headline: 'New post',
             body: 'A body!!!',
             subject: 'New post'
           },
@@ -521,6 +525,7 @@ class SerializerTest < ActionDispatch::IntegrationTest
             },
             attributes: {
               title: 'New post',
+              headline: 'New post',
               body: 'A body!!!',
               subject: 'New post'
             },
@@ -563,6 +568,7 @@ class SerializerTest < ActionDispatch::IntegrationTest
               },
               attributes: {
                 title: 'JR Solves your serialization woes!',
+                headline: 'JR Solves your serialization woes!',
                 body: 'Use JR',
                 subject: 'JR Solves your serialization woes!'
               },
@@ -693,6 +699,7 @@ class SerializerTest < ActionDispatch::IntegrationTest
                 },
                 attributes: {
                     title: 'New post',
+                    headline: 'New post',
                     body: 'A body!!!',
                     subject: 'New post'
                 },
@@ -825,6 +832,7 @@ class SerializerTest < ActionDispatch::IntegrationTest
             },
             attributes: {
               title: 'New post',
+              headline: 'New post',
               body: 'A body!!!',
               subject: 'New post'
             },
@@ -886,6 +894,7 @@ class SerializerTest < ActionDispatch::IntegrationTest
           },
           attributes: {
             title: 'New post',
+            headline: 'New post',
             body: 'A body!!!',
             subject: 'New post'
           },

@@ -560,6 +560,13 @@ class PostsControllerTest < ActionController::TestCase
     assert_match /id is not a valid sort criteria for post/, response.body
   end
 
+  def test_show_includes_deprecated_meta
+    get :show, params: {id: '1'}
+    assert_response :success
+    assert json_response['data'].is_a?(Hash)
+    assert_equal 'Please use the title attribute.', json_response['data']['meta']['deprecations']['attributes']['headline']
+  end
+
   def test_show_single_no_includes
     assert_cacheable_get :show, params: {id: '1'}
     assert_response :success
@@ -661,6 +668,14 @@ class PostsControllerTest < ActionController::TestCase
 
   ensure
     JSONAPI.configuration.always_include_to_one_linkage_data = false
+  end
+
+  def test_index_includes_deprecated_meta
+    get :index
+    assert_response :success
+    puts json_response
+    assert json_response['data'].is_a?(Hash)
+    assert_equal 'Please use the title attribute.', json_response['data']['meta']['deprecations']['attributes']['headline']
   end
 
   def test_show_single_with_fields
@@ -4825,4 +4840,6 @@ class Api::V6::AuthorDetailsControllerTest < ActionController::TestCase
     assert_equal 1, json_response['data'].size
     assert_not_nil json_response['data'][0]['relationships']['author']['data']
   end
+
+
 end

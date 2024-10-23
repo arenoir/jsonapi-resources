@@ -103,6 +103,12 @@ module JSONAPI
           warning.to_hash
         end
       end
+      
+      if result.deprecations.any?
+        @top_level_meta[:deprecations] = result.deprecations.collect do |deprecation|
+          deprecation.to_hash
+        end
+      end
     end
 
     def top_level_meta

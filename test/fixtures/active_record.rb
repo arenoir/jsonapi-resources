@@ -1392,6 +1392,7 @@ class PostResource < JSONAPI::Resource
   attribute :title
   attribute :body
   attribute :subject
+  attribute :headline, delegate: :title, deprecated: 'Please use the title attribute.'
 
   has_one :author, class_name: 'Person'
   has_one :section

@@ -254,6 +254,11 @@ module JSONAPI
 
     def meta_hash(source)
       meta = source.meta(custom_generation_options)
+
+      if source.deprecations
+        meta['deprecations'] = source.deprecations
+      end
+
       (meta.is_a?(Hash) && meta) || {}
     end
 

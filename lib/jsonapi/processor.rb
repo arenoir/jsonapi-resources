@@ -358,6 +358,7 @@ module JSONAPI
     def result_options
       options = {}
       options[:warnings] = params[:warnings] if params[:warnings]
+      options[:deprecations] = params[:deprecations] if params[:deprecations]
       options
     end
 

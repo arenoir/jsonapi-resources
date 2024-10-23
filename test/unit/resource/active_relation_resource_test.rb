@@ -3,6 +3,7 @@ require File.expand_path('../../../test_helper', __FILE__)
 class ArPostResource < JSONAPI::Resource
   model_name 'Post'
   attribute :headline, delegate: :title
+  #attribute :title, deprecated: 'Please use the headline attribute.'
   has_one :author
   has_many :tags, primary_key: :tags_import_id
 end

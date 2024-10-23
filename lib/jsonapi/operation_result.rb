@@ -7,6 +7,7 @@ module JSONAPI
     attr_accessor :links
     attr_accessor :options
     attr_accessor :warnings
+    attr_accessor :deprecations
 
     def initialize(code, options = {})
       @code = Rack::Utils.status_code(code)
@@ -14,6 +15,7 @@ module JSONAPI
       @meta = options.fetch(:meta, {})
       @links = options.fetch(:links, {})
       @warnings = options.fetch(:warnings, {})
+      @deprecations = options.fetch(:deprecations, {})
     end
 
     def to_hash(serializer = nil)
