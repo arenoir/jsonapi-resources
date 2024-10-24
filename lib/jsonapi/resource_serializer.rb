@@ -163,6 +163,7 @@ module JSONAPI
       return obj_hash if source.nil?
 
       fetchable_fields = Set.new(source.fetchable_fields)
+      puts fetchable_fields
 
       if source.is_a?(JSONAPI::CachedResponseFragment)
         id_format = source.resource_klass._attribute_options(:id)[:format]
@@ -196,7 +197,9 @@ module JSONAPI
         relationships = relationships_hash(source, fetchable_fields, relationship_data)
         obj_hash['relationships'] = relationships unless relationships.blank?
 
-        meta = meta_hash(source)
+        relationships_deprecations_meta = relationships_deprecations(source, fetchable_fields)
+        
+        meta = meta_hash(source, relationships_deprecations_meta)
         obj_hash['meta'] = meta unless meta.empty?
       end
 
@@ -252,11 +255,16 @@ module JSONAPI
       }
     end
 
-    def meta_hash(source)
+    def meta_hash(source, relationships_deprecations_meta)
       meta = source.meta(custom_generation_options)
 
       if source.deprecations
         meta['deprecations'] = source.deprecations
+      end
+
+      if !relationships_deprecations_meta.empty?
+        meta['deprecations'] ||= {}
+        meta['deprecations']['relationships'] = relationships_deprecations_meta
       end
 
       (meta.is_a?(Hash) && meta) || {}
@@ -293,6 +301,29 @@ module JSONAPI
 
           ro = relationship_object(source, relationship, rids, include_data)
           hash[format_key(name)] = ro unless ro.blank?
+        end
+      end
+    end
+
+    def relationships_deprecations(source, fetchable_fields)
+      return {} unless JSONAPI.configuration.resource_deprecations
+
+      relationships = source.class._relationships.select{|k,_v| fetchable_fields.include?(k) }
+
+      relationships.each_with_object({}) do |(name, relationship), deprecations|
+        deprecated_message = relationship.options[:deprecated]
+
+        if deprecated_message
+          deprecations[name] ||= deprecated_message
+
+          JSONAPI.configuration.deprecation_logger(
+            identity: source.identity.to_s,
+            type: 'relationship',
+            name: name,
+            message: deprecated_message,
+            context: options[:context]
+          )
+
         end
       end
     end

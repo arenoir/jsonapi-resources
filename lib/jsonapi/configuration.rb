@@ -43,6 +43,8 @@ module JSONAPI
                 :resource_cache_usage_report_function,
                 :default_exclude_links
 
+    attr_accessor :resource_deprecations
+
     def initialize
       #:underscored_key, :camelized_key, :dasherized_key, or custom
       self.json_key_format = :dasherized_key
@@ -160,6 +162,9 @@ module JSONAPI
       # and relationships. Accepts either `:default`, `:none`, or array containing the
       # specific default links to exclude, which may be `:self` and `:related`.
       self.default_exclude_links = :none
+
+      # Enable/Disable the resource deprecation feature.
+      self.resource_deprecations = false
     end
 
     def cache_formatters=(bool)
@@ -254,6 +259,22 @@ module JSONAPI
     def exception_class_whitelist=(exception_class_allowlist)
       ActiveSupport::Deprecation.warn('`exception_class_whitelist` has been replaced by `exception_class_allowlist`')
       @exception_class_allowlist = exception_class_allowlist
+    end
+
+    def format_deprecation_logger_context(context)
+      'context message not configured'
+    end
+
+    def format_deprecation_logger_message(identity:, type:, name:, message:, context:)
+      context_message = format_deprecation_logger_context(context)
+
+      "JSONAPI::Resources::Deprecation identity:#{identity} type:#{type} name:#{name} message:#{message} context:#{context_message}"
+    end
+
+    def deprecation_logger(identity:, type:, name:, message:, context:)
+      message = format_deprecation_logger_message(identity: identity, type: type, name: name, message: message, context: context)
+
+      Rails.logger.warn(message)
     end
 
     attr_writer :allow_sort, :allow_filter, :default_allow_include_to_one, :default_allow_include_to_many

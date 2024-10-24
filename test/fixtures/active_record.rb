@@ -1395,6 +1395,7 @@ class PostResource < JSONAPI::Resource
   attribute :headline, delegate: :title, deprecated: 'Please use the title attribute.'
 
   has_one :author, class_name: 'Person'
+  has_one :writer, class_name: 'Person', deprecated: 'Please use author.'
   has_one :section
   has_many :tags, acts_as_set: true, inverse_relationship: :posts, eager_load_on_include: false
   has_many :comments, acts_as_set: false, inverse_relationship: :post

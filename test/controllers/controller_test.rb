@@ -561,11 +561,32 @@ class PostsControllerTest < ActionController::TestCase
   end
 
   def test_show_includes_deprecated_meta
-    get :show, params: {id: '1'}
+    JSONAPI.configuration.resource_deprecations = true
+
+    assert_cacheable_get :show, params: {id: '1'}
     assert_response :success
     assert json_response['data'].is_a?(Hash)
     assert_equal 'Please use the title attribute.', json_response['data']['meta']['deprecations']['attributes']['headline']
+  ensure
+    JSONAPI.configuration.resource_deprecations = false
   end
+
+  def test_show_logs_deprecation_warnings
+    JSONAPI.configuration.resource_deprecations = true
+
+    with_logger_introspection do |logger_output|
+      get :show, params: {id: '1'}
+
+      assert_equal(
+        'JSONAPI::Resources::Deprecation identity:PostResource:1 type:attribute name:headline message:Please use the title attribute. context:context message not configured',
+        logger_output.string.strip
+      )
+    end
+
+  ensure
+    JSONAPI.configuration.resource_deprecations = false
+  end
+
 
   def test_show_single_no_includes
     assert_cacheable_get :show, params: {id: '1'}
@@ -671,11 +692,26 @@ class PostsControllerTest < ActionController::TestCase
   end
 
   def test_index_includes_deprecated_meta
+    JSONAPI.configuration.resource_deprecations = true
     get :index
     assert_response :success
-    puts json_response
-    assert json_response['data'].is_a?(Hash)
-    assert_equal 'Please use the title attribute.', json_response['data']['meta']['deprecations']['attributes']['headline']
+    assert json_response['data'].is_a?(Array)
+    json_response['data'].each do |post|
+      assert_equal 'Please use the title attribute.', post['meta']['deprecations']['attributes']['headline']
+    end
+  ensure
+    JSONAPI.configuration.resource_deprecations = false
+  end
+
+  def test_includes_deprecated_relationship_adds_deprecated_meta_data
+    assert_cacheable_get :show, params: {id: '17', include: 'author,writer'}
+
+    assert_response :success
+    assert json_response['data']['relationships']['author'].has_key?('data'), 'data key should exist for empty has_one relationship'
+    assert_nil json_response['data']['relationships']['author']['data'], 'Data should be null'
+    assert json_response['data']['relationships']['tags'].has_key?('data'), 'data key should exist for empty has_many relationship'
+    assert json_response['data']['relationships']['tags']['data'].is_a?(Array), 'Data should be array'
+    assert json_response['data']['relationships']['tags']['data'].empty?, 'Data array should be empty'
   end
 
   def test_show_single_with_fields
